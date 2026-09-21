@@ -7,6 +7,11 @@ export function validate(d){
  const v=e.value;if(!v||v.id!==e.key||typeof v.archived!=='boolean')throw Error('笔记内容格式无效');
  if(e.table==='paper'){if(!isText(v.title,1000)||!v.title.trim()||!isText(v.authors,500)||!isText(v.year,20)||!isText(v.source,2000)||!isText(v.tags,300)||!['reading','unread','done'].includes(v.status))throw Error('文献信息格式无效');}
  else if(!isText(v.paperId,100)||!isText(v.text)||!isText(v.locator,2000)||!['note','quote','inspiration','question'].includes(v.kind)||!Array.isArray(v.images)||v.images.length>20||v.images.some(x=>typeof x!=='string'||!/^img-[a-f0-9]{64}$/.test(x)))throw Error('笔记或截图信息格式无效');
+ if(e.table==='note'){
+  if(v.source!==undefined&&!isText(v.source,3000))throw Error('笔记来源格式无效');
+  if(v.tags!==undefined&&(!Array.isArray(v.tags)||v.tags.length>12||v.tags.some(t=>!isText(t,50))))throw Error('分类标签格式无效');
+  if(v.ai!==undefined){const a=v.ai;if(!a||!Array.isArray(a.tags)||a.tags.length>4||a.tags.some(t=>!isText(t,50))||!Array.isArray(a.keywords)||a.keywords.length>20||a.keywords.some(t=>!isText(t,80))||!isText(a.ocr,18000)||!isText(a.fingerprint,64)||!Number.isFinite(a.confidence)||a.confidence<0||a.confidence>1)throw Error('AI 分类结果格式无效');}
+ }
  map.set(e.id,e);}
  const indegree=new Map(),children=new Map();for(const e of d.events){indegree.set(e.id,e.parents.length);for(const p of e.parents){const parent=map.get(p);if(!parent||parent.key!==e.key||parent.table!==e.table)throw Error('缺少关联版本');if(!children.has(p))children.set(p,[]);children.get(p).push(e.id);}}
  const queue=d.events.filter(e=>!e.parents.length).map(e=>e.id);for(let i=0;i<queue.length;i++)for(const id of children.get(queue[i])||[]){indegree.set(id,indegree.get(id)-1);if(!indegree.get(id))queue.push(id);}if(queue.length!==d.events.length)throw Error('版本关联存在循环');
