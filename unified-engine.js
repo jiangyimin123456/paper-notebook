@@ -18,6 +18,18 @@ async function checked(r){if(!r.ok)throw Error(r.status===401?'授权失效，�
 async function checkRepo(c){const r=await request(c);await checked(r);const v=await r.json();if(!v.private||!v.permissions?.push)throw Error('只能同步到有读写权限的私有仓库');}
 export async function saveConfiguration(value,pass){if(inFlight)throw Error('请等待本轮同步完成');checkCredentials(value);const encrypted=await encrypt(value,pass);for(const m of modules){try{await checkRepo(value[m.id]);}catch(e){throw Error(m.name+'：'+e.message);}}await set('workspace-sync-vault',encrypted);credentials=structuredClone(value);message='已统一解锁';results={};notify();return syncAll();}
 export async function unlockAll(pass){if(inFlight)throw Error('请等待本轮同步完成');const v=await get('workspace-sync-vault');if(!v)throw Error('请先设置统一同步');const value=await decrypt(v,pass);checkCredentials(value);credentials=value;message='已统一解锁';notify();return syncAll();}
+export async function useEnglishPassword(pass){
+ if(inFlight)throw Error('请等待本轮同步完成');
+ const existing=await get('workspace-sync-vault');
+ if(existing){let value;try{value=await decrypt(existing,pass);}catch{}if(value){checkCredentials(value);credentials=value;notify();return syncAll();}}
+ const english=modules.find(m=>m.id==='english'),old=await english.store.get(english.vault);
+ if(!old)throw Error('当前浏览器没有英语学习的原授权。请在原来能同步英语的浏览器打开本站，或使用“配置或更新授权”。');
+ let original;try{original=await decrypt(old,pass);}catch{throw Error('英语学习原同步密码不正确，请重试');}
+ const value={english:{...original.config,token:original.token}};
+ for(const m of modules.filter(m=>m.id!=='english')){const v=await m.store.get(m.vault);if(v){try{const c=await decrypt(v,pass);value[m.id]={...c.config,token:c.token};}catch{throw Error(m.name+'原密码与英语密码不同。请在“导入原有授权”中输入各模块旧密码，并把新的统一密码设为英语密码。');}}else value[m.id]=m.id==='progress'?{...value.paper}:{owner:original.config.owner,repo:m.repo,token:original.token};}
+ // Validate every target before replacing any existing unified vault.
+ return saveConfiguration(value,pass);
+}
 export function lockAll(){if(inFlight)throw Error('同步尚未结束，请稍后锁定');credentials=null;clearTimeout(timer);message='全部同步 · 已锁定';notify();}
 export async function legacyAvailability(){const out={};for(const m of modules)out[m.id]=!!await m.store.get(m.vault);return out;}
 export async function importLegacy(passwords,newPass){if(inFlight)throw Error('请等待同步完成');const value={};for(const m of modules){const v=await m.store.get(m.vault);if(!v){if(m.id==='progress'&&value.paper){value.progress={...value.paper};continue;}throw Error(m.name+'尚无原授权，请使用新令牌配置');}try{const old=await decrypt(v,passwords[m.id]||'');value[m.id]={...old.config,token:old.token};}catch(e){throw Error(m.name+'：'+e.message);}}return saveConfiguration(value,newPass);}
