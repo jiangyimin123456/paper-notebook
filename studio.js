@@ -13,3 +13,5 @@ let timer;const schedule=()=>{clearTimeout(timer);timer=setTimeout(update,90);};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('focus-mode')&&!document.querySelector('dialog[open]'))focus.click();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&!document.querySelector('dialog[open]')){const save=$('#save-entry')||$('#save-note');if(save&&!save.disabled){e.preventDefault();save.click();}}});
 
 import './workspace-tools.js';
+
+import './capture-assistant.js';

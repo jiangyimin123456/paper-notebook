@@ -1,0 +1,26 @@
+{
+  "engine": "tesseract.js@7.0.0",
+  "core": "tesseract.js-core@7.0.0",
+  "languages": [
+    "@tesseract.js-data/eng@1.0.0",
+    "@tesseract.js-data/chi_sim@1.0.0"
+  ],
+  "sources": [
+    {
+      "package": "js.tgz",
+      "sha256": "9a93bf51c3387f945d10a24bf8b3a4bf2e45c7c7161b8242aafbaf9d3c4b606a"
+    },
+    {
+      "package": "core.tgz",
+      "sha256": "ba584355515eaff877552022853c0e71f2cb70466e759d1d6940484929718ee0"
+    },
+    {
+      "package": "eng.tgz",
+      "sha256": "c9bddf2e2f0a214ac7918f3f4a3caf45e09ce8674fe26662ae7787ac8927f7bb"
+    },
+    {
+      "package": "chi_sim.tgz",
+      "sha256": "850d4a217c87808ef765385cbe5825f4ae99047a49b17e024069ceb663f01c33"
+    }
+  ]
+}
