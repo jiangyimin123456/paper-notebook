@@ -1,4 +1,4 @@
-import * as sync from './unified-engine.js';
+const sync=window.parent!==window&&window.parent.__workspaceSync||await import('./unified-engine.js');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('./unified-sync.css',import.meta.url);document.head.append(style);
 const bar=document.createElement('section');bar.className='unified-bar';bar.innerHTML='<span id="workspace-sync-status" role="status">全部同步 · 尚未解锁</span><div><button id="workspace-sync-now">全部同步</button><button id="workspace-sync-settings">同步设置</button></div>';

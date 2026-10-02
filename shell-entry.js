@@ -1,0 +1,1 @@
+(()=>{if(window.top!==window||new URL(location.href).searchParams.has('standalone'))return;const src=new URL(document.currentScript.src),url=new URL('workbench.html',src);url.search=location.search;url.searchParams.set('module',location.pathname.includes('/progress/')?'progress':location.pathname.includes('/english/')?'english':'paper');location.replace(url);})();

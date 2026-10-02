@@ -15,3 +15,5 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.class
 import './workspace-tools.js';
 
 import './capture-assistant.js';
+
+const more=document.createElement('details');more.className='studio-more';more.innerHTML='<summary>更多工具 · 版式、历史与备份</summary><div class="studio-more-content"></div>';document.querySelector('.workspace-tools').after(more);const tray=more.lastElementChild;for(const id of ['note-history','note-pin','format-note','undo-assistant','data-open']){const el=document.getElementById(id);if(el)tray.append(el);}window.addEventListener('notebook-image-added',()=>{});
