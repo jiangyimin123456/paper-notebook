@@ -1,1 +1,13 @@
 html,body{height:100%;margin:0;background:#f5f6f0;color:#29463e;font-family:system-ui}body{display:flex;flex-direction:column}.module-nav{flex-shrink:0}.module-nav button{border:0;background:transparent;color:inherit;padding:10px;cursor:pointer}.module-nav button[aria-current=page]{background:#dce8dd;border-radius:8px;font-weight:bold}.unified-bar{flex-shrink:0}#modules{flex:1;min-height:0}#modules iframe{width:100%;height:100%;border:0;display:block}#modules iframe[hidden]{display:none}#shell-error{margin:4px 16px;color:#a33025}dialog{border:1px solid #cdd7cc;border-radius:14px;max-width:680px;width:90vw;max-height:85vh;overflow:auto;padding:24px}dialog button,dialog label.button{display:inline-block;padding:10px;margin:6px;border:1px solid #cdd7cc;background:white;border-radius:7px;cursor:pointer}#backup-message{white-space:pre-wrap} @media(max-width:650px){.module-nav{padding:6px;flex-wrap:wrap}.module-nav button{padding:8px}.module-home{font-size:14px}}
+/* Shared controls use one compact desktop row. */
+.workbench-header{display:flex;align-items:center;gap:16px;min-height:52px;padding:0 18px;box-sizing:border-box;flex-shrink:0;background:#f5f4ee;border-bottom:1px solid #dbdfd4}
+.workbench-header .module-nav{flex:1;min-width:0;border:0;background:transparent;padding:0;gap:16px;flex-wrap:nowrap}
+.workbench-header .module-nav>div{gap:4px;flex-shrink:0}
+.workbench-header .module-nav button{white-space:nowrap;padding:7px 10px;font:13px/1.5 system-ui}
+.workbench-header .unified-bar{flex:0 1 auto;min-width:0;padding:0;border:0;background:transparent;gap:10px;flex-wrap:nowrap}
+.workbench-header #workspace-sync-status{max-width:240px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workbench-header .unified-bar>div{flex-shrink:0;gap:6px}
+.workbench-header .unified-bar button{padding:6px 10px;white-space:nowrap}
+.workbench-header button:focus-visible{outline:2px solid #55774a;outline-offset:2px}
+@media(max-width:1100px){.workbench-header .module-home{display:none}.workbench-header #workspace-sync-status{max-width:180px}.workbench-header{gap:12px;padding:0 12px}}
+@media(max-width:700px){.workbench-header{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:5px 8px}.workbench-header .module-nav{flex:none;justify-content:center}.workbench-header .module-nav>div{width:100%;justify-content:space-between;gap:2px}.workbench-header .module-nav button{padding:5px 8px}.workbench-header .unified-bar{justify-content:space-between;font-size:12px;gap:6px}.workbench-header #workspace-sync-status{max-width:none;flex:1}.workbench-header .unified-bar button{padding:4px 8px}}
