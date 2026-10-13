@@ -18,3 +18,11 @@ body.studio .studio-inspector{background:#fbfcfa;border-left-color:var(--log-lin
 body.studio.research-log .module-nav{background:#fff;border-bottom-color:var(--log-line);color:var(--log-ink)}body.studio.research-log .module-nav a[aria-current=page]{background:var(--log-soft);color:var(--log-accent-strong)}
 body.studio.research-log .topbar{gap:14px}body.studio.research-log .top-actions{gap:9px}body.studio.research-log .workspace-tools{display:flex;align-items:center;gap:7px;margin-left:auto;padding:0;border:0;background:transparent;flex-wrap:nowrap}body.studio.research-log .workspace-tools #all-search{min-height:34px;padding:6px 9px}body.studio.research-log .save-statuses{display:flex;width:auto;margin:0;gap:8px;white-space:nowrap;font-size:10px}.research-log .capture-controls{padding:8px 0 0;border:0;background:transparent;max-height:none}.research-log .capture-controls .row{padding-top:8px;border-top:1px solid var(--log-line)}.research-log .ocr-card{margin:7px 7px 0 0}.research-log .studio-more{padding:6px 22px;background:#fbfcfa}.research-log .studio-more-content{padding:6px 0}.research-log .studio-more .capture-controls[hidden]{display:none}
 @media(max-width:1050px){body.studio.research-log .topbar{flex-wrap:wrap}.research-log .workspace-tools{order:3;width:100%;margin-left:0}.research-log .save-statuses{margin-left:auto}}@media(max-width:700px){body.studio.research-log .workspace-tools{flex-wrap:wrap}.research-log .save-statuses{width:100%;margin-left:0;white-space:normal}.research-log .top-actions{width:auto}.research-log .studio-more{padding:6px 14px}}
+
+/* Keep writing controls available and remove auxiliary surfaces from research logs. */
+body.studio.research-log .studio-inspector{display:none}
+body.studio.research-log .workspace{grid-template-columns:300px minmax(0,1fr)}
+body.studio.research-log #entry-form>details{display:none}
+body.studio.research-log .page-toolbar{position:sticky;top:0;margin:0 -28px;padding:10px 28px;box-shadow:0 8px 15px #284d4010}
+@media(max-width:700px){body.studio.research-log .page-toolbar{position:sticky;top:0;margin:0 -18px;padding:9px 18px}.research-log .studio-inspector{display:none}}
+body.studio.research-log .library .studio-recent,body.studio.research-log .library .library-foot{display:none}
