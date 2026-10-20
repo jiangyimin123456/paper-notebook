@@ -1,3 +1,4 @@
+import {validateAcademic} from './academic-record.js';
 export const empty=()=>({schemaVersion:1,events:[]});
 const isText=(v,n=100000)=>typeof v==='string'&&v.length<=n;
 export function validate(d){
@@ -8,6 +9,7 @@ export function validate(d){
  if(e.table==='paper'){if(!isText(v.title,1000)||!v.title.trim()||!isText(v.authors,500)||!isText(v.year,20)||!isText(v.source,2000)||!isText(v.tags,300)||!['reading','unread','done'].includes(v.status))throw Error('文献信息格式无效');}
  else if(!isText(v.paperId,100)||!isText(v.text)||!isText(v.locator,2000)||!['note','quote','inspiration','question'].includes(v.kind)||!Array.isArray(v.images)||v.images.length>20||v.images.some(x=>typeof x!=='string'||!/^img-[a-f0-9]{64}$/.test(x)))throw Error('笔记或截图信息格式无效');
  if(e.table==='note'){
+  validateAcademic(v);
   if(v.html!==undefined&&!isText(v.html,450000))throw Error('笔记页过长');if(v.pinned!==undefined&&typeof v.pinned!=='boolean')throw Error('置顶格式无效');
   if(v.source!==undefined&&!isText(v.source,3000))throw Error('笔记来源格式无效');
   if(v.tags!==undefined&&(!Array.isArray(v.tags)||v.tags.length>12||v.tags.some(t=>!isText(t,50))))throw Error('分类标签格式无效');
