@@ -2,6 +2,10 @@ import {academicState} from '../academic-document.js';
 // Desktop journal tools operate on the current editor and keep its normal save path.
 export function setup(panel){
  const $=s=>document.querySelector(s),main=$('#main');
+ let observedHeading;
+ const headingSize=new ResizeObserver(entries=>{for(const entry of entries)if(entry.target===observedHeading)document.documentElement.style.setProperty('--log-heading-height',entry.target.getBoundingClientRect().height+'px');});
+ const trackHeading=()=>{const heading=$('.log-entry-heading');if(heading===observedHeading)return;headingSize.disconnect();observedHeading=heading;if(heading)headingSize.observe(heading);else document.documentElement.style.removeProperty('--log-heading-height');};
+ window.addEventListener('studio-note-open',trackHeading);trackHeading();
  const settings=document.createElement('dialog');settings.id='log-settings';
  settings.innerHTML='<div class="dialog-heading"><h2>日志阅读设置</h2><button type="button" aria-label="关闭阅读设置">×</button></div><p class="meta">这台浏览器会记住你的版式偏好。</p><label>正文宽度<select id="log-width"><option value="comfortable">舒适阅读</option><option value="wide">宽屏图文</option></select></label><label>正文字号<select id="log-font"><option value="15">15 px</option><option value="17">17 px</option><option value="19">19 px</option></select></label>';
  document.body.append(settings);settings.querySelector('button').onclick=()=>settings.close();
@@ -31,7 +35,7 @@ export function setup(panel){
  let frame=0;
  const update=()=>{frame=0;const editor=$('#page-editor'),buttons=[...panel.querySelectorAll('.studio-outline button')],headings=[...(editor?.querySelectorAll('h1,h2,h3,h4,h5,h6')||[])];
   $('#log-template-open').disabled=!editable();meter.hidden=!editor;
-  const top=main.getBoundingClientRect().top+main.clientHeight*.5;let active=0;for(let i=0;i<headings.length;i++)if(headings[i].getBoundingClientRect().top<=top)active=i;
+  const inset=parseFloat(getComputedStyle(main).scrollPaddingTop)||0,top=main.getBoundingClientRect().top+(main.clientHeight+inset)*.5+2;let active=0;for(let i=0;i<headings.length;i++)if(headings[i].getBoundingClientRect().top<=top)active=i;
   if(main.scrollHeight>main.clientHeight&&main.scrollTop+main.clientHeight>=main.scrollHeight-3)active=Math.max(0,headings.length-1);
   buttons.forEach((b,i)=>{b.style.setProperty('--outline-depth',headings[i]?Math.max(0,Number(headings[i].tagName.slice(1))-2):0);if(i===active)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');});
   const max=main.scrollHeight-main.clientHeight;meter.querySelector('progress').value=max>0?Math.min(100,Math.max(0,main.scrollTop/max*100)):100;
