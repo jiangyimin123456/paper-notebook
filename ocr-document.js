@@ -35,6 +35,11 @@ export function documentFromEditor(root){
  const walk=node=>{if(node.nodeType===1&&/^(OL|UL)$/.test(node.tagName)){flush();let n=Number(node.getAttribute('start'))||1;for(const li of node.children){inline(li);flush(node.tagName==='OL'?'ordered':'bullet',n++);}return;}if(node.nodeType===1&&/^(P|DIV|H[1-6]|BLOCKQUOTE|LI)$/.test(node.tagName)){flush();for(const child of node.childNodes)walk(child);flush();return;}inline(node);};
  for(const child of root.childNodes)walk(child);flush();return normalizeOcrDocument({blocks});
 }
+export function ocrClipboard(doc){doc=normalizeOcrDocument(doc);return {text:documentText(doc),html:'<div data-paper-ocr="1">'+documentHTML(doc)+'</div>'};}
+export function pasteTextHTML(clipboard){
+ const html=clipboard?.getData('text/html');if(html){const template=document.createElement('template');template.innerHTML=html;const content=template.content.querySelector('[data-paper-ocr="1"]')||(template.content.querySelector('strong,b,ol,ul')?template.content:null);if(content){try{return documentHTML(documentFromEditor(content));}catch{}}}
+ return escapeHTML(clipboard?.getData('text/plain')||'').replace(/\r?\n/g,'<br>');
+}
 export function buildOcrDocument(result){
  if(result.document)return normalizeOcrDocument(result.document);
  const lines=[];let group=0,removed=0;
