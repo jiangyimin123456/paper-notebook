@@ -36,8 +36,24 @@ export function documentFromEditor(root){
  for(const child of root.childNodes)walk(child);flush();return normalizeOcrDocument({blocks});
 }
 export function ocrClipboard(doc){doc=normalizeOcrDocument(doc);return {text:documentText(doc),html:'<div data-paper-ocr="1">'+documentHTML(doc)+'</div>'};}
+function pasteMarkup(root){
+ const allowed=new Set(['P','DIV','H2','H3','BR','STRONG','B','EM','I','U','MARK','BLOCKQUOTE','PRE','CODE','UL','OL','LI']);
+ function walk(node){
+  if(node.nodeType===3)return escapeHTML(node.textContent);
+  if(node.nodeType!==1||/^(SCRIPT|STYLE|SVG|MATH|IFRAME|OBJECT|TEMPLATE|IMG|VIDEO|AUDIO|LINK)$/.test(node.tagName))return '';
+  // Code is literal; preserve indentation, line breaks and angle brackets together.
+  if(node.tagName==='PRE')return '<pre><code>'+escapeHTML(node.textContent)+'</code></pre>';
+  const tag=/^H[1-6]$/.test(node.tagName)?(Number(node.tagName[1])<=2?'H2':'H3'):node.tagName;
+  const inside=[...node.childNodes].map(walk).join('');
+  if(!allowed.has(tag))return node.tagName==='SPAN'&&/^(?:bold|[6-9]00)$/.test(node.style.fontWeight)?'<strong>'+inside+'</strong>':inside;
+  if(tag==='BR')return '<br>';
+  let attr='';if(tag==='OL'){const start=Number(node.getAttribute('start'));if(Number.isInteger(start)&&start>0&&start<=999)attr=' start="'+start+'"';}
+  return '<'+tag.toLowerCase()+attr+'>'+inside+'</'+tag.toLowerCase()+'>';
+ }
+ return [...root.childNodes].map(walk).join('');
+}
 export function pasteTextHTML(clipboard){
- const html=clipboard?.getData('text/html');if(html){const template=document.createElement('template');template.innerHTML=html;const content=template.content.querySelector('[data-paper-ocr="1"]')||(template.content.querySelector('strong,b,ol,ul')?template.content:null);if(content){try{return documentHTML(documentFromEditor(content));}catch{}}}
+ const html=clipboard?.getData('text/html');if(html&&html.length<=1000000){const template=document.createElement('template');template.innerHTML=html;const content=template.content.querySelector('[data-paper-ocr="1"]')||(template.content.querySelector('strong,b,ol,ul,pre,code,em,i,h1,h2,h3,span[style]')?template.content:null);if(content){const safe=pasteMarkup(content);if(safe)return safe;}}
  return escapeHTML(clipboard?.getData('text/plain')||'').replace(/\r?\n/g,'<br>');
 }
 export function buildOcrDocument(result){
