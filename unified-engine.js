@@ -8,7 +8,18 @@ let localChanges=0;
 export let message='全部同步 · 尚未解锁';
 export const unlocked=()=>!!credentials;
 export const running=()=>!!inFlight;
-export const hasVault=async()=>!!await get('workspace-sync-vault');
+const vaultKey='workspace-sync-vault',backupKey='paper-notebook:encrypted-sync-vault:v1';
+function validVault(v){const bytes=(a,n)=>Array.isArray(a)&&(n?a.length===n:a.length>=16&&a.length<=100000)&&a.every(x=>Number.isInteger(x)&&x>=0&&x<=255);return !!v&&bytes(v.salt,16)&&bytes(v.iv,12)&&bytes(v.data);}
+function backupVault(v){try{localStorage.setItem(backupKey,JSON.stringify(v));}catch{/* IndexedDB remains the primary copy when localStorage is unavailable. */}}
+async function readVault(){
+ // A storage read error must surface as an error, never as a first-time setup.
+ const primary=await get(vaultKey);
+ if(primary){if(!validVault(primary))throw Error('本机授权格式异常，请保留浏览器数据后重试');backupVault(primary);return primary;}
+ let saved;try{saved=JSON.parse(localStorage.getItem(backupKey)||'null');}catch{}
+ return validVault(saved)?saved:null;
+}
+async function retainVault(v){await set(vaultKey,v);backupVault(v);try{await navigator.storage?.persist?.();}catch{/* Browser persistence is best effort. */}}
+export const hasVault=async()=>!!await readVault();
 function notify(){window.dispatchEvent(new Event('workspace-sync'));}
 function schedule(delay=3500){clearTimeout(timer);if(credentials)timer=setTimeout(()=>void syncAll(),delay);}
 async function derive(pass,salt){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new Uint8Array(salt),iterations:600000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
@@ -18,12 +29,12 @@ function checkCredentials(value){for(const m of modules){const c=value?.[m.id];i
 async function request(c,path='',init={}){return fetch('https://api.github.com/repos/'+c.owner+'/'+c.repo+path,{...init,redirect:'error',cache:'no-store',signal:AbortSignal.timeout(25000),headers:{Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',Authorization:'Bearer '+c.token,...init.headers}});}
 async function checked(r){if(!r.ok)throw Error(r.status===401?'授权失效，请更新令牌':r.status===403?'没有权限或请求限流':r.status===404?'仓库不存在或令牌未授权该仓库':'GitHub 请求失败（'+r.status+'）');}
 async function checkRepo(c){const r=await request(c);await checked(r);const v=await r.json();if(!v.private||!v.permissions?.push)throw Error('只能同步到有读写权限的私有仓库');}
-export async function saveConfiguration(value,pass){if(inFlight)throw Error('请等待本轮同步完成');checkCredentials(value);const encrypted=await encrypt(value,pass);for(const m of modules){try{await checkRepo(value[m.id]);}catch(e){throw Error(m.name+'：'+e.message);}}await set('workspace-sync-vault',encrypted);credentials=structuredClone(value);message='已统一解锁';results={};notify();return syncAll();}
-export async function unlockAll(pass){if(inFlight)throw Error('请等待本轮同步完成');const v=await get('workspace-sync-vault');if(!v)throw Error('请先设置统一同步');const value=await decrypt(v,pass);checkCredentials(value);credentials=value;message='已统一解锁';notify();return syncAll();}
+export async function saveConfiguration(value,pass){if(inFlight)throw Error('请等待本轮同步完成');checkCredentials(value);const encrypted=await encrypt(value,pass);for(const m of modules){try{await checkRepo(value[m.id]);}catch(e){throw Error(m.name+'：'+e.message);}}await retainVault(encrypted);credentials=structuredClone(value);message='已统一解锁';results={};notify();return syncAll();}
+export async function unlockAll(pass){if(inFlight)throw Error('请等待本轮同步完成');const v=await readVault();if(!v)throw Error('当前浏览器未找到已保存的授权，请使用原浏览器或恢复原授权');const value=await decrypt(v,pass);checkCredentials(value);await retainVault(v);credentials=value;message='已统一解锁';notify();return syncAll();}
 export async function useEnglishPassword(pass){
  if(inFlight)throw Error('请等待本轮同步完成');
- const existing=await get('workspace-sync-vault');
- if(existing){let value;try{value=await decrypt(existing,pass);}catch{}if(value){checkCredentials(value);credentials=value;notify();return syncAll();}}
+ const existing=await readVault();
+ if(existing)return unlockAll(pass);
  const english=modules.find(m=>m.id==='english'),old=await english.store.get(english.vault);
  if(!old)throw Error('当前浏览器没有英语学习的原授权。请在原来能同步英语的浏览器打开本站，或使用“配置或更新授权”。');
  let original;try{original=await decrypt(old,pass);}catch{throw Error('英语学习原同步密码不正确，请重试');}
@@ -34,7 +45,15 @@ export async function useEnglishPassword(pass){
 }
 export function lockAll(){if(inFlight)throw Error('同步尚未结束，请稍后锁定');credentials=null;clearTimeout(timer);message='全部同步 · 已锁定';notify();}
 export async function legacyAvailability(){const out={};for(const m of modules)out[m.id]=!!await m.store.get(m.vault);return out;}
-export async function importLegacy(passwords,newPass){if(inFlight)throw Error('请等待同步完成');const value={};for(const m of modules){const v=await m.store.get(m.vault);if(!v){if(m.id==='progress'&&value.paper){value.progress={...value.paper};continue;}throw Error(m.name+'尚无原授权，请使用新令牌配置');}try{const old=await decrypt(v,passwords[m.id]||'');value[m.id]={...old.config,token:old.token};}catch(e){throw Error(m.name+'：'+e.message);}}return saveConfiguration(value,newPass);}
+function completeLegacy(value){const source=value.paper||value.english||value.progress;if(!source)throw Error('当前浏览器未找到已保存的授权');for(const m of modules)if(!value[m.id])value[m.id]=m.id==='progress'&&value.paper?{...value.paper}:{...source,repo:m.repo};return value;}
+export async function useSavedPassword(pass){
+ if(await hasVault())return unlockAll(pass);
+ if(inFlight)throw Error('请等待同步完成');
+ const value={};
+ for(const m of modules){const v=await m.store.get(m.vault);if(!v)continue;let old;try{old=await decrypt(v,pass);}catch{throw Error(m.name+'原解锁密码不匹配，请展开“导入原有授权”分别填写');}value[m.id]={...old.config,token:old.token};}
+ return saveConfiguration(completeLegacy(value),pass);
+}
+export async function importLegacy(passwords,newPass){if(inFlight)throw Error('请等待同步完成');if(await hasVault())throw Error('本机已有统一授权，请先使用统一解锁密码');const value={};for(const m of modules){const v=await m.store.get(m.vault);if(!v)continue;try{const old=await decrypt(v,passwords[m.id]||'');value[m.id]={...old.config,token:old.token};}catch(e){throw Error(m.name+'：'+e.message);}}return saveConfiguration(completeLegacy(value),newPass);}
 const encode=s=>{let out='';for(const b of new TextEncoder().encode(s))out+=String.fromCharCode(b);return btoa(out);};
 const decode=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,'')),c=>c.charCodeAt(0)));
 async function read(c,path,max=850000){const r=await request(c,'/contents/'+path);if(r.status===404)return null;await checked(r);const f=await r.json();if(f.type!=='file'||!Number.isFinite(f.size)||f.size>max)throw Error('同步文件过大或格式异常');let text;if(f.encoding==='base64')text=decode(f.content);else{if(!/^[a-f0-9]{40,64}$/.test(f.sha||''))throw Error('同步文件标识异常');const raw=await request(c,'/git/blobs/'+f.sha,{headers:{Accept:'application/vnd.github.raw+json'}});await checked(raw);text=await raw.text();}if(bytes(text)>max)throw Error('同步文件超过安全读取容量');return {sha:f.sha,text};}
