@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>日常记事 · 纸间</title><link rel="icon" href="../favicon.svg"><link rel="stylesheet" href="daily.css"><script src="../shell-entry.js"></script></head>
+<body>
+<div class="notepad">
+ <aside class="sidebar" aria-label="记事列表">
+  <a class="brand" href="../workbench.html?module=daily"><span class="brand-mark">记</span><span>日常记事<small>EVERYDAY NOTES</small></span></a>
+  <button id="new-note" class="primary">＋ 新建记事 <kbd>Ctrl N</kbd></button>
+  <label class="search"><span aria-hidden="true">⌕</span><input id="query" type="search" placeholder="搜索标题或正文" aria-label="搜索日常记事"></label>
+  <nav class="views" aria-label="记事筛选"><button data-view="all" aria-pressed="true">全部记事 <span id="note-count">0</span></button><button data-view="pinned" aria-pressed="false">置顶</button><button data-view="trash" aria-pressed="false">回收站</button></nav>
+  <div class="categories" aria-label="记事分类"><button data-category="" aria-pressed="true">全部</button><button data-category="生活" aria-pressed="false">生活</button><button data-category="待办" aria-pressed="false">待办</button><button data-category="灵感" aria-pressed="false">灵感</button></div>
+  <div id="note-list" class="note-list"></div>
+  <footer class="sidebar-footer"><span>● 仅本机保存 · 已纳入全部备份</span><div><button id="backup">备份</button><button id="import">导入</button><input id="import-file" type="file" accept="application/json,.json" hidden></div></footer>
+ </aside>
+ <main>
+  <header class="page-top"><span id="today"></span><div class="top-actions"><span id="save-state" role="status">随时记下，慢慢整理</span><button id="focus" aria-pressed="false">专注书写</button></div></header>
+  <p id="error" role="alert" hidden></p>
+  <section id="welcome" class="welcome"><div class="paper-icon" aria-hidden="true">✎</div><p class="eyebrow">留一点空间，给日常。</p><h1>生活里的小事，<br>也值得记下。</h1><p>一份购物清单、一个突然的想法，<br>或是今天想留住的片刻。</p><button id="first-note" class="primary">写下第一条记事 <span>↗</span></button><div class="welcome-line"><span>随手记录</span><span>自动保存</span><span>自由整理</span></div></section>
+  <section id="editor" class="editor" hidden>
+   <div class="note-meta"><label><span class="sr-only">记事日期</span><input id="note-date" type="date" required></label><span>·</span><label><span class="sr-only">分类</span><select id="note-category"><option>生活</option><option>待办</option><option>灵感</option></select></label><div class="note-actions"><button id="pin" aria-pressed="false">置顶</button><button id="export-text">导出文本</button><button id="delete">移入回收站</button><button id="restore" hidden>恢复记事</button></div></div>
+   <div id="version-bar" class="version-bar" hidden><label>备份中有并行版本 <select id="version"></select></label><button id="resolve">保留当前版本并合并</button></div>
+   <input id="note-title" class="note-title" maxlength="300" placeholder="无标题记事" aria-label="记事标题" autocomplete="off">
+   <div class="writing-tools"><button id="insert-list">☷ 清单</button><button id="insert-date">＋ 时间</button><span>想到什么，就写下来。</span></div>
+   <textarea id="note-text" placeholder="从这里开始，记录今天的小事……" aria-label="记事正文" spellcheck="false" maxlength="200000"></textarea>
+   <footer class="editor-footer"><span id="word-count">0 字</span><span id="edited-at"></span><button id="save-copy" hidden>另存为新记事</button><span class="shortcut">Ctrl / ⌘ S 保存</span></footer>
+  </section>
+ </main>
+</div>
+<script type="module" src="daily.js"></script>
+</body></html>

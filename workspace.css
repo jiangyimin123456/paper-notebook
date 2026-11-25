@@ -6,3 +6,4 @@
 .module-nav a[aria-current=page]{background:#294d40;color:white}
 .module-nav a:focus-visible{outline:2px solid #927738;outline-offset:3px}
 @media(max-width:540px){.module-nav{padding:10px 14px;gap:8px;flex-wrap:wrap}.module-nav>div>a{padding:6px 10px}}
+:root{color-scheme:light}

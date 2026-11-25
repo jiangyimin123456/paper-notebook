@@ -5,9 +5,11 @@ html,body{height:100%;margin:0;background:#f5f6f0;color:#29463e;font-family:syst
 .workbench-header .module-nav>div{gap:4px;flex-shrink:0}
 .workbench-header .module-nav button{white-space:nowrap;padding:7px 10px;font:13px/1.5 system-ui}
 .workbench-header .unified-bar{flex:0 1 auto;min-width:0;padding:0;border:0;background:transparent;gap:10px;flex-wrap:nowrap}
-.workbench-header #workspace-sync-status{max-width:240px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.workbench-header .unified-bar>div{flex-shrink:0;gap:6px}
-.workbench-header .unified-bar button{padding:6px 10px;white-space:nowrap}
+.workbench-header #workspace-sync-status{white-space:nowrap}
+.workbench-header .unified-bar>button{padding:0 12px;white-space:nowrap}
 .workbench-header button:focus-visible{outline:2px solid #55774a;outline-offset:2px}
-@media(max-width:1100px){.workbench-header .module-home{display:none}.workbench-header #workspace-sync-status{max-width:180px}.workbench-header{gap:12px;padding:0 12px}}
-@media(max-width:700px){.workbench-header{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:5px 8px}.workbench-header .module-nav{flex:none;justify-content:center}.workbench-header .module-nav>div{width:100%;justify-content:space-between;gap:2px}.workbench-header .module-nav button{padding:5px 8px}.workbench-header .unified-bar{justify-content:space-between;font-size:12px;gap:6px}.workbench-header #workspace-sync-status{max-width:none;flex:1}.workbench-header .unified-bar button{padding:4px 8px}}
+@media(max-width:1100px){.workbench-header .module-home{display:none}.workbench-header{gap:12px;padding:0 12px}}
+@media(min-width:701px) and (max-width:850px){.workbench-header .module-nav button{padding:7px}.workbench-header .unified-bar{gap:5px}}
+@media(max-width:700px){.workbench-header{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:5px 8px}.workbench-header .module-nav{flex:none;justify-content:center}.workbench-header .module-nav>div{width:100%;justify-content:space-between;gap:2px}.workbench-header .module-nav button{padding:5px 8px}.workbench-header .unified-bar{position:absolute;right:10px;top:8px}.workbench-header .unified-bar>button{min-height:32px;padding:0 10px}}
+:root{color-scheme:light}
+@media(max-width:700px){.workbench-header{position:relative;padding:38px 8px 5px}.workbench-header .unified-bar{top:4px}.workbench-header .module-nav button{font-size:12px}}
